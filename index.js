@@ -126,7 +126,7 @@ bot.on('message', (msg) => {
 `<b>📍 Joylashuv:</b> <a href="${userData[chatId].locationLink}">Ko‘rish</a>`;
 
             bot.sendMessage(GROUP_ID, orderText, { parse_mode: 'HTML', disable_web_page_preview: false });
-            bot.sendMessage(chatId, "So‘rovingiz @toshsamtaxi24 guruhga yuborildi.", {
+            bot.sendMessage(chatId, "So‘rovingiz @toshsamtaxi24 guruhga yuborildi. Haydovchilar sizga tez orada aloqaga chiqadi", {
                 reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
             });
             userData[chatId] = {};
