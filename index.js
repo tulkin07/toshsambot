@@ -7,18 +7,16 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const token = process.env.BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: false }); // polling o'chiriladi
+const bot = new TelegramBot(token, { polling: false }); 
 
 const GROUP_ID = '-1002360240004';
 let userData = {};
 
-// Webhook URL (domainingizni o'zgartiring)
 const URL = process.env.WEBHOOK_URL || 'https://SIZNING_DOMAIN.com';
 bot.setWebHook(`${URL}/bot${token}`);
 
 app.use(bodyParser.json());
 
-// Telegram xabarlarni qabul qilish endpoint
 app.post(`/bot${token}`, (req, res) => {
     bot.processUpdate(req.body);
     res.sendStatus(200);
