@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const TelegramBot = require('node-telegram-bot-api');
-const fetch = require('node-fetch'); // ping uchun
+const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,11 +28,7 @@ bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     userData[chatId] = {};
     bot.sendMessage(chatId, "Assalomu alaykum! Kim sifatida davom etasiz?", {
-        reply_markup: {
-            keyboard: [["🚖 Haydovchi", "🧍 Yo‘lovchi"]],
-            resize_keyboard: true,
-            one_time_keyboard: true
-        }
+        reply_markup: { keyboard: [["🚖 Haydovchi", "🧍 Yo‘lovchi"]], resize_keyboard: true, one_time_keyboard: true }
     });
 });
 
@@ -58,10 +54,7 @@ bot.on('message', (msg) => {
         userData[chatId].namePhone = text;
         userData[chatId].step = "route";
         bot.sendMessage(chatId, "Yo‘nalishingizni tanlang:", {
-            reply_markup: {
-                keyboard: [["Samarqand → Toshkent", "Toshkent → Samarqand"]],
-                resize_keyboard: true
-            }
+            reply_markup: { keyboard: [["Samarqand → Toshkent", "Toshkent → Samarqand"]], resize_keyboard: true }
         });
         return;
     }
@@ -85,48 +78,26 @@ bot.on('message', (msg) => {
     // Yo‘lovchi soni / pochta
     if (userData[chatId]?.step === "passengers") {
         userData[chatId].passengers = text;
-        userData[chatId].step = "confirm";
+        userData[chatId].step = "location";
 
-        let summary = `🤵 Yo‘lovchi\n` +
-            `1⃣ Ism va telefon: ${userData[chatId].namePhone}\n` +
-            `3⃣ Bormoqchi: ${userData[chatId].route}\n` +
-            `4️⃣ Yo‘lovchi yoki pochta: ${userData[chatId].passengers}`;
-
-        bot.sendMessage(chatId, summary + "\n\nBarcha ma'lumotlar to‘g‘rimi?", {
-            reply_markup: { keyboard: [["✅ HA", "❌ YO‘Q"]], resize_keyboard: true }
+        // Location so‘rash
+        bot.sendMessage(chatId, "Iltimos, hozirgi joylashuvingizni ulashing:", {
+            reply_markup: {
+                keyboard: [[{ text: "Joylashuvni yuborish", request_location: true }], ["🏠 Bosh sahifa"]],
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
         });
         return;
     }
 
-    // Tasdiqlash
-    if (userData[chatId]?.step === "confirm") {
-        if (text === "✅ HA") {
-            // Foydalanuvchidan location so‘rash
-            userData[chatId].step = "location";
-            bot.sendMessage(chatId, "Iltimos, hozirgi joylashuvingizni ulashing:", {
-                reply_markup: {
-                    keyboard: [[{ text: "Joylashuvni yuborish", request_location: true }], ["🏠 Bosh sahifa"]],
-                    resize_keyboard: true,
-                    one_time_keyboard: true
-                }
-            });
-        } else if (text === "❌ YO‘Q") {
-            bot.sendMessage(chatId, "So‘rovingiz bekor qilindi.", {
-                reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
-            });
-            userData[chatId] = {};
-        }
-        return;
-    }
-
-    // Location qabul qilinishi
+    // Location qabul qilinishi va guruhga xabar jo‘natish
     if (userData[chatId]?.step === "location" && msg.location) {
         const { latitude, longitude } = msg.location;
         const locationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
         let username = msg.from.username ? `@${msg.from.username}` : " ";
 
-        // Guruhga xabar
-        let locationText =
+        let finalText =
 `<b>🚖 Yangi buyurtma!</b>\n\n` +
 `<b>👤 Ism va telefon:</b> ${userData[chatId].namePhone}\n` +
 `<b>💬 Telegram:</b> ${username}\n` +
@@ -134,15 +105,17 @@ bot.on('message', (msg) => {
 `<b>🧍 Yo‘lovchi / 📦 Pochta:</b> ${userData[chatId].passengers}\n` +
 `<b>📍 Joylashuv:</b> <a href="${locationLink}">Ko‘rish</a>`;
 
-        bot.sendMessage(GROUP_ID, locationText, { parse_mode: 'HTML', disable_web_page_preview: false });
+        // Guruhga yuborish
+        bot.sendMessage(GROUP_ID, finalText, { parse_mode: 'HTML', disable_web_page_preview: false });
 
+        // Foydalanuvchiga tasdiqlash
         bot.sendMessage(chatId, `Joylashuvingiz qabul qilindi!\n\n<b>Joylashuv:</b> <a href="${locationLink}">Ko‘rish</a>`, { 
-            parse_mode: 'HTML',
-            disable_web_page_preview: false,
+            parse_mode: 'HTML', disable_web_page_preview: false,
             reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
         });
 
         userData[chatId] = {}; // stepni tozalash
+        return;
     }
 
     // Bosh sahifa
