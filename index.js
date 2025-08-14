@@ -101,8 +101,7 @@ bot.on('message', (msg) => {
 
     if (userData[chatId]?.step === "confirm") {
         if (text === "✅ HA") {
-            let username = msg.from.username ? `@${msg.from.username}` : "—";
-
+            let username = msg.from.username ? `@${msg.from.username}` : " ";
             let orderText =
 `<b>🚖 Yangi buyurtma!</b>\n\n` +
 `<b>👤 Ism va telefon:</b> ${userData[chatId].namePhone}\n` +
