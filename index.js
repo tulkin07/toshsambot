@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const token = process.env.BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: false }); 
+const bot = new TelegramBot(token, { polling: false });
 
 const GROUP_ID = '-1002360240004';
 let userData = {};
@@ -91,30 +91,51 @@ bot.on('message', (msg) => {
         return;
     }
 
-    // Location qabul qilinishi va guruhga xabar jo‘natish
+    // Location qabul qilinishi
     if (userData[chatId]?.step === "location" && msg.location) {
         const { latitude, longitude } = msg.location;
-        const locationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
-        let username = msg.from.username ? `@${msg.from.username}` : " ";
+        userData[chatId].locationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        userData[chatId].step = "confirm";
 
-        let finalText =
+        // Tasdiqlash xabari
+        bot.sendMessage(chatId,
+`🤵 Yo‘lovchi\n` +
+`1⃣ Ism va telefon: ${userData[chatId].namePhone}\n` +
+`2⃣ Telegram: ${msg.from.username ? `@${msg.from.username}` : " "}\n` +
+`3⃣ Yo‘nalish: ${userData[chatId].route}\n` +
+`4⃣ Yo‘lovchi / Pochta: ${userData[chatId].passengers}\n` +
+`5⃣ Joylashuv: <a href="${userData[chatId].locationLink}">Ko‘rish</a>\n\n` +
+`Barcha ma'lumotlar to‘g‘rimi?`,
+{
+    parse_mode: 'HTML',
+    reply_markup: { keyboard: [["✅ HA", "❌ YO‘Q"]], resize_keyboard: true }
+});
+        return;
+    }
+
+    // Tasdiqlash step
+    if (userData[chatId]?.step === "confirm") {
+        if (text === "✅ HA") {
+            const username = msg.from.username ? `@${msg.from.username}` : " ";
+            const orderText =
 `<b>🚖 Yangi buyurtma!</b>\n\n` +
 `<b>👤 Ism va telefon:</b> ${userData[chatId].namePhone}\n` +
 `<b>💬 Telegram:</b> ${username}\n` +
 `<b>📍 Yo‘nalish:</b> ${userData[chatId].route}\n` +
 `<b>🧍 Yo‘lovchi / 📦 Pochta:</b> ${userData[chatId].passengers}\n` +
-`<b>📍 Joylashuv:</b> <a href="${locationLink}">Ko‘rish</a>`;
+`<b>📍 Joylashuv:</b> <a href="${userData[chatId].locationLink}">Ko‘rish</a>`;
 
-        // Guruhga yuborish
-        bot.sendMessage(GROUP_ID, finalText, { parse_mode: 'HTML', disable_web_page_preview: false });
-
-        // Foydalanuvchiga tasdiqlash
-        bot.sendMessage(chatId, `Joylashuvingiz qabul qilindi!\n\n<b>Joylashuv:</b> <a href="${locationLink}">Ko‘rish</a>`, { 
-            parse_mode: 'HTML', disable_web_page_preview: false,
-            reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
-        });
-
-        userData[chatId] = {}; // stepni tozalash
+            bot.sendMessage(GROUP_ID, orderText, { parse_mode: 'HTML', disable_web_page_preview: false });
+            bot.sendMessage(chatId, "So‘rovingiz @toshsamtaxi24 guruhga yuborildi.", {
+                reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
+            });
+            userData[chatId] = {};
+        } else if (text === "❌ YO‘Q") {
+            bot.sendMessage(chatId, "So‘rovingiz bekor qilindi.", {
+                reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
+            });
+            userData[chatId] = {};
+        }
         return;
     }
 
@@ -131,9 +152,9 @@ app.listen(PORT, () => {
     console.log(`Server ${PORT} portda ishga tushdi`);
 });
 
-// ---------------- PING FUNKSIYASI (uxlab qolmasligi uchun) ----------------
+// ---------------- PING FUNKSIYASI ----------------
 setInterval(() => {
     fetch(`${URL}/bot${token}`)
         .then(res => console.log('Ping status:', res.status))
         .catch(err => console.log('Ping xatolik:', err.message));
-}, 30000); 
+}, 30000);
