@@ -17,27 +17,18 @@ const URL = process.env.WEBHOOK_URL || 'https://SIZNING_DOMAIN.com';
 bot.setWebHook(`${URL}/bot${token}`);
 
 app.use(bodyParser.json());
+
 app.post(`/bot${token}`, (req, res) => {
     bot.processUpdate(req.body);
     res.sendStatus(200);
 });
-
-// ---------------- KEYBOARDLAR ----------------
-
-// Start va bosh sahifa uchun
-const startKeyboard = [
-    ["🚖 Haydovchi", "🧍 Yo‘lovchi"]
-];
-
-// Faqat Bosh sahifa tugmasi
-const homeKeyboard = [["🏠 Bosh sahifa"]];
 
 // ---------------- BOT HANDLERLARI ----------------
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     userData[chatId] = {};
     bot.sendMessage(chatId, "Assalomu alaykum! Kim sifatida davom etasiz?", {
-        reply_markup: { keyboard: startKeyboard, resize_keyboard: true, one_time_keyboard: true }
+        reply_markup: { keyboard: [["🚖 Haydovchi", "🧍 Yo‘lovchi"]], resize_keyboard: true, one_time_keyboard: true }
     });
 });
 
@@ -45,60 +36,38 @@ bot.on('message', (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
 
-    // =================== BOSH SAHIFA ===================
-    if (text === "🏠 Bosh sahifa") {
-        userData[chatId] = {};
-        bot.sendMessage(chatId, "Bosh sahifa:", {
-            reply_markup: { keyboard: startKeyboard, resize_keyboard: true }
-        });
-        return;
-    }
-
-    // =================== HAYDOVCHI ===================
+    // Haydovchi
     if (text === "🚖 Haydovchi") {
-        bot.sendMessage(chatId, "Agar siz haydovchi sifatida qo'shilmoqchi bo'lsangiz @frontend_soft ga yoki +998900678097 ga murojaat qiling.", {
-            reply_markup: { keyboard: startKeyboard, resize_keyboard: true }
-        });
+        bot.sendMessage(chatId, "Agar siz haydovchi sifatida qo'shilmoqchi bo'lsangiz @frontend_soft ga yoki +998900678097 ga murojaat qiling.");
         return;
     }
 
-    // =================== YO'LOVCHI ===================
+    // Yo‘lovchi
     if (text === "🧍 Yo‘lovchi") {
-        bot.sendMessage(chatId, "Taksi chaqirish uchun ariza berish.\nIsmingiz va raqamingizni kiriting.\nMasalan: Ali +998xx xxx xx xx", {
-            reply_markup: { keyboard: homeKeyboard, resize_keyboard: true }
-        });
+        bot.sendMessage(chatId, "Taksi chaqirish uchun ariza berish.\nIsmingiz va raqamingizni kiriting.\nMasalan:Ali +998xx xxx xx xx");
         userData[chatId] = { step: "name_phone" };
         return;
     }
 
-    // =================== ISM VA TELEFON ===================
+    // Ism va telefon
     if (userData[chatId]?.step === "name_phone") {
         userData[chatId].namePhone = text;
         userData[chatId].step = "route";
-
         bot.sendMessage(chatId, "Yo‘nalishingizni tanlang:", {
-            reply_markup: {
-                keyboard: [
-                    ["Samarqand → Toshkent", "Toshkent → Samarqand"],
-                    ...homeKeyboard
-                ],
-                resize_keyboard: true
-            }
+            reply_markup: { keyboard: [["Samarqand → Toshkent", "Toshkent → Samarqand"]], resize_keyboard: true }
         });
         return;
     }
 
-    // =================== YO'NALISH ===================
+    // Yo‘nalish
     if (userData[chatId]?.step === "route") {
         userData[chatId].route = text;
         userData[chatId].step = "passengers";
-
         bot.sendMessage(chatId, "Nechta yo‘lovchi yoki pochta:", {
             reply_markup: {
                 keyboard: [
                     ["Pochta bor", "1 kishi", "2 kishi"],
-                    ["3 kishi", "4 kishi", "Boshqa"],
-                    ...homeKeyboard
+                    ["3 kishi", "4 kishi","Boshqa"]
                 ],
                 resize_keyboard: true
             }
@@ -106,14 +75,15 @@ bot.on('message', (msg) => {
         return;
     }
 
-    // =================== YO'LOVCHI SONI / POCHTA ===================
+    // Yo‘lovchi soni / pochta
     if (userData[chatId]?.step === "passengers") {
         userData[chatId].passengers = text;
         userData[chatId].step = "location";
 
+        // Location so‘rash
         bot.sendMessage(chatId, "Iltimos, hozirgi joylashuvingizni ulashing:", {
             reply_markup: {
-                keyboard: [[{ text: "Joylashuvni yuborish", request_location: true }], ...homeKeyboard],
+                keyboard: [[{ text: "Joylashuvni yuborish", request_location: true }], ["🏠 Bosh sahifa"]],
                 resize_keyboard: true,
                 one_time_keyboard: true
             }
@@ -121,12 +91,13 @@ bot.on('message', (msg) => {
         return;
     }
 
-    // =================== LOCATION QABUL QILINISHI ===================
+    // Location qabul qilinishi
     if (userData[chatId]?.step === "location" && msg.location) {
         const { latitude, longitude } = msg.location;
         userData[chatId].locationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
         userData[chatId].step = "confirm";
 
+        // Tasdiqlash xabari
         bot.sendMessage(chatId,
 `🤵 Yo‘lovchi\n` +
 `1⃣ Ism va telefon: ${userData[chatId].namePhone}\n` +
@@ -137,12 +108,12 @@ bot.on('message', (msg) => {
 `Barcha ma'lumotlar to‘g‘rimi?`,
 {
     parse_mode: 'HTML',
-    reply_markup: { keyboard: [["✅ HA", "❌ YO‘Q"], ...homeKeyboard], resize_keyboard: true }
+    reply_markup: { keyboard: [["✅ HA", "❌ YO‘Q"]], resize_keyboard: true }
 });
         return;
     }
 
-    // =================== TASDIQLASH ===================
+    // Tasdiqlash step
     if (userData[chatId]?.step === "confirm") {
         if (text === "✅ HA") {
             const username = msg.from.username ? `@${msg.from.username}` : " ";
@@ -155,17 +126,24 @@ bot.on('message', (msg) => {
 `<b>📍 Joylashuv:</b> <a href="${userData[chatId].locationLink}">Ko‘rish</a>`;
 
             bot.sendMessage(GROUP_ID, orderText, { parse_mode: 'HTML', disable_web_page_preview: false });
-            bot.sendMessage(chatId, "So‘rovingiz guruhga yuborildi. Haydovchilar sizga tez orada aloqaga chiqadi", {
-                reply_markup: { keyboard: homeKeyboard, resize_keyboard: true }
+            bot.sendMessage(chatId, "So‘rovingiz @toshsamtaxi24 guruhga yuborildi. Haydovchilar sizga tez orada aloqaga chiqadi", {
+                reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
             });
             userData[chatId] = {};
         } else if (text === "❌ YO‘Q") {
             bot.sendMessage(chatId, "So‘rovingiz bekor qilindi.", {
-                reply_markup: { keyboard: homeKeyboard, resize_keyboard: true }
+                reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
             });
             userData[chatId] = {};
         }
         return;
+    }
+
+    // Bosh sahifa
+    if (text === "🏠 Bosh sahifa") {
+        bot.sendMessage(chatId, "Bosh sahifa:", {
+            reply_markup: { keyboard: [["🚖 Haydovchi", "🧍 Yo‘lovchi"]], resize_keyboard: true }
+        });
     }
 });
 
