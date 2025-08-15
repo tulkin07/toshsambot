@@ -44,7 +44,7 @@ bot.on('message', (msg) => {
 
     // Yo‘lovchi
     if (text === "🧍 Yo‘lovchi") {
-        bot.sendMessage(chatId, "Taksi chaqirish uchun ariza berish.\nIsmingiz va raqamingizni kiriting.\nMasalan:Ali +998xx xxx xx xx");
+        bot.sendMessage(chatId, "Taksi chaqirish uchun ariza berish.\nIsmingiz va raqamingizni kiriting.\nMasalan: Ali +998xx xxx xx xx");
         userData[chatId] = { step: "name_phone" };
         return;
     }
