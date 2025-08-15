@@ -22,17 +22,22 @@ app.post(`/bot${token}`, (req, res) => {
     res.sendStatus(200);
 });
 
-// ---------------- COMMON KEYBOARD ----------------
-const commonKeyboard = [
-    ["🏠 Bosh sahifa"]
+// ---------------- KEYBOARDLAR ----------------
+
+// Start va bosh sahifa uchun
+const startKeyboard = [
+    ["🚖 Haydovchi", "🧍 Yo‘lovchi"]
 ];
+
+// Faqat Bosh sahifa tugmasi
+const homeKeyboard = [["🏠 Bosh sahifa"]];
 
 // ---------------- BOT HANDLERLARI ----------------
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     userData[chatId] = {};
     bot.sendMessage(chatId, "Assalomu alaykum! Kim sifatida davom etasiz?", {
-        reply_markup: { keyboard: commonKeyboard, resize_keyboard: true, one_time_keyboard: true }
+        reply_markup: { keyboard: startKeyboard, resize_keyboard: true, one_time_keyboard: true }
     });
 });
 
@@ -44,7 +49,7 @@ bot.on('message', (msg) => {
     if (text === "🏠 Bosh sahifa") {
         userData[chatId] = {};
         bot.sendMessage(chatId, "Bosh sahifa:", {
-            reply_markup: { keyboard: commonKeyboard, resize_keyboard: true }
+            reply_markup: { keyboard: startKeyboard, resize_keyboard: true }
         });
         return;
     }
@@ -52,7 +57,7 @@ bot.on('message', (msg) => {
     // =================== HAYDOVCHI ===================
     if (text === "🚖 Haydovchi") {
         bot.sendMessage(chatId, "Agar siz haydovchi sifatida qo'shilmoqchi bo'lsangiz @frontend_soft ga yoki +998900678097 ga murojaat qiling.", {
-            reply_markup: { keyboard: commonKeyboard, resize_keyboard: true }
+            reply_markup: { keyboard: startKeyboard, resize_keyboard: true }
         });
         return;
     }
@@ -60,7 +65,7 @@ bot.on('message', (msg) => {
     // =================== YO'LOVCHI ===================
     if (text === "🧍 Yo‘lovchi") {
         bot.sendMessage(chatId, "Taksi chaqirish uchun ariza berish.\nIsmingiz va raqamingizni kiriting.\nMasalan: Ali +998xx xxx xx xx", {
-            reply_markup: { keyboard: commonKeyboard, resize_keyboard: true }
+            reply_markup: { keyboard: homeKeyboard, resize_keyboard: true }
         });
         userData[chatId] = { step: "name_phone" };
         return;
@@ -75,7 +80,7 @@ bot.on('message', (msg) => {
             reply_markup: {
                 keyboard: [
                     ["Samarqand → Toshkent", "Toshkent → Samarqand"],
-                    ...commonKeyboard
+                    ...homeKeyboard
                 ],
                 resize_keyboard: true
             }
@@ -93,7 +98,7 @@ bot.on('message', (msg) => {
                 keyboard: [
                     ["Pochta bor", "1 kishi", "2 kishi"],
                     ["3 kishi", "4 kishi", "Boshqa"],
-                    ...commonKeyboard
+                    ...homeKeyboard
                 ],
                 resize_keyboard: true
             }
@@ -108,7 +113,7 @@ bot.on('message', (msg) => {
 
         bot.sendMessage(chatId, "Iltimos, hozirgi joylashuvingizni ulashing:", {
             reply_markup: {
-                keyboard: [[{ text: "Joylashuvni yuborish", request_location: true }], ...commonKeyboard],
+                keyboard: [[{ text: "Joylashuvni yuborish", request_location: true }], ...homeKeyboard],
                 resize_keyboard: true,
                 one_time_keyboard: true
             }
@@ -132,7 +137,7 @@ bot.on('message', (msg) => {
 `Barcha ma'lumotlar to‘g‘rimi?`,
 {
     parse_mode: 'HTML',
-    reply_markup: { keyboard: [["✅ HA", "❌ YO‘Q"], ...commonKeyboard], resize_keyboard: true }
+    reply_markup: { keyboard: [["✅ HA", "❌ YO‘Q"], ...homeKeyboard], resize_keyboard: true }
 });
         return;
     }
@@ -151,12 +156,12 @@ bot.on('message', (msg) => {
 
             bot.sendMessage(GROUP_ID, orderText, { parse_mode: 'HTML', disable_web_page_preview: false });
             bot.sendMessage(chatId, "So‘rovingiz guruhga yuborildi. Haydovchilar sizga tez orada aloqaga chiqadi", {
-                reply_markup: { keyboard: commonKeyboard, resize_keyboard: true }
+                reply_markup: { keyboard: homeKeyboard, resize_keyboard: true }
             });
             userData[chatId] = {};
         } else if (text === "❌ YO‘Q") {
             bot.sendMessage(chatId, "So‘rovingiz bekor qilindi.", {
-                reply_markup: { keyboard: commonKeyboard, resize_keyboard: true }
+                reply_markup: { keyboard: homeKeyboard, resize_keyboard: true }
             });
             userData[chatId] = {};
         }
