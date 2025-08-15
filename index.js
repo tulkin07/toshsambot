@@ -94,7 +94,7 @@ bot.on('message', (msg) => {
     // Location qabul qilinishi
     if (userData[chatId]?.step === "location" && msg.location) {
         const { latitude, longitude } = msg.location;
-        userData[chatId].locationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+         userData[chatId].locationLink = `https://yandex.com/maps/?ll=${longitude}%2C${latitude}&z=15`;
         userData[chatId].step = "confirm";
 
         // Tasdiqlash xabari
