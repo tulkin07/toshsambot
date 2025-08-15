@@ -24,8 +24,7 @@ app.post(`/bot${token}`, (req, res) => {
 
 // ---------------- COMMON KEYBOARD ----------------
 const commonKeyboard = [
-    ["🏠 Bosh sahifa"],
-    ["🚖 Haydovchi", "🧍 Yo‘lovchi"]
+    ["🏠 Bosh sahifa"]
 ];
 
 // ---------------- BOT HANDLERLARI ----------------
