@@ -146,7 +146,7 @@ Haydovchilar tez orada siz bilan bog‘lanishadi ✅
 Biz bilan safaringiz xavfsiz, qulay va tezkor bo‘lishiga ishonch hosil qilamiz.  
 
 👉 Eng so‘nggi yangiliklar va imkoniyatlardan xabardor bo‘lish uchun 
-@guruhingiz nomi ga a’zo bo‘lib qo‘ying!
+@toshsamtaxi24 nomi ga a’zo bo‘lib qo‘ying!
 `, {
                 reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
             });
