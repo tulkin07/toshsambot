@@ -62,9 +62,9 @@ bot.on('message', (msg) => {
         userData[chatId].step = "route";
 
         bot.sendMessage(chatId, "Yo‘nalishingizni tanlang:", {
-            reply_markup: { 
-                keyboard: [["Samarqand → Toshkent", "Toshkent → Samarqand"]], 
-                resize_keyboard: true 
+            reply_markup: {
+                keyboard: [["Samarqand → Toshkent", "Toshkent → Samarqand"]],
+                resize_keyboard: true
             }
         });
         return;
@@ -78,7 +78,7 @@ bot.on('message', (msg) => {
             reply_markup: {
                 keyboard: [
                     ["Pochta bor", "1 kishi", "2 kishi"],
-                    ["3 kishi", "4 kishi","Boshqa"]
+                    ["3 kishi", "4 kishi", "Boshqa"]
                 ],
                 resize_keyboard: true
             }
@@ -110,18 +110,18 @@ bot.on('message', (msg) => {
 
         // Tasdiqlash xabari
         bot.sendMessage(chatId,
-`🤵 Yo‘lovchi\n` +
-`1⃣ Ism: ${userData[chatId].name}\n` +
-`2⃣ Telefon: ${userData[chatId].phone}\n` +
-`3⃣ Telegram: ${msg.from.username ? `@${msg.from.username}` : " "}\n` +
-`4⃣ Yo‘nalish: ${userData[chatId].route}\n` +
-`5⃣ Yo‘lovchi / Pochta: ${userData[chatId].passengers}\n` +
-`6⃣ Joylashuv: <a href="${userData[chatId].locationLink}">Ko‘rish</a>\n\n` +
-`Barcha ma'lumotlar to‘g‘rimi?`,
-{
-    parse_mode: 'HTML',
-    reply_markup: { keyboard: [["✅ HA", "❌ YO‘Q"]], resize_keyboard: true }
-});
+            `🤵 Yo‘lovchi\n` +
+            `1⃣ Ism: ${userData[chatId].name}\n` +
+            `2⃣ Telefon: ${userData[chatId].phone}\n` +
+            `3⃣ Telegram: ${msg.from.username ? `@${msg.from.username}` : " "}\n` +
+            `4⃣ Yo‘nalish: ${userData[chatId].route}\n` +
+            `5⃣ Yo‘lovchi / Pochta: ${userData[chatId].passengers}\n` +
+            `6⃣ Joylashuv: <a href="${userData[chatId].locationLink}">Ko‘rish</a>\n\n` +
+            `Barcha ma'lumotlar to‘g‘rimi?`,
+            {
+                parse_mode: 'HTML',
+                reply_markup: { keyboard: [["✅ HA", "❌ YO‘Q"]], resize_keyboard: true }
+            });
         return;
     }
 
@@ -130,16 +130,24 @@ bot.on('message', (msg) => {
         if (text === "✅ HA") {
             const username = msg.from.username ? `@${msg.from.username}` : " ";
             const orderText =
-`<b>🚖 Yangi buyurtma!</b>\n\n` +
-`<b>👤 Ism:</b> ${userData[chatId].name}\n` +
-`<b>📞 Telefon:</b> ${userData[chatId].phone}\n` +
-`<b>💬 Telegram:</b> ${username}\n` +
-`<b>📍 Yo‘nalish:</b> ${userData[chatId].route}\n` +
-`<b>🧍 Yo‘lovchi / 📦 Pochta:</b> ${userData[chatId].passengers}\n` +
-`<b>📍 Joylashuv:</b> <a href="${userData[chatId].locationLink}">Ko‘rish</a>`;
+                `<b>🚖 Yangi buyurtma!</b>\n\n` +
+                `<b>👤 Ism:</b> ${userData[chatId].name}\n` +
+                `<b>📞 Telefon:</b> +${userData[chatId].phone}\n` +
+                `<b>💬 Telegram:</b> ${username}\n` +
+                `<b>📍 Yo‘nalish:</b> ${userData[chatId].route}\n` +
+                `<b>🧍 Yo‘lovchi / 📦 Pochta:</b> ${userData[chatId].passengers}\n` +
+                `<b>📍 Joylashuv:</b> <a href="${userData[chatId].locationLink}">Ko‘rish</a>`;
 
             bot.sendMessage(GROUP_ID, orderText, { parse_mode: 'HTML', disable_web_page_preview: false });
-            bot.sendMessage(chatId, "So‘rovingiz guruhga yuborildi. Haydovchilar tez orada aloqaga chiqadi ✅", {
+            bot.sendMessage(chatId, `🚖 So‘rovingiz @toshsamtaxi24 guruhiga yuborildi. 
+Haydovchilar tez orada siz bilan bog‘lanishadi ✅ 
+
+🙏 Bizni tanlaganingiz uchun katta rahmat! Sizning ishonchingiz biz uchun juda muhim. 
+Biz bilan safaringiz xavfsiz, qulay va tezkor bo‘lishiga ishonch hosil qilamiz.  
+
+👉 Eng so‘nggi yangiliklar va imkoniyatlardan xabardor bo‘lish uchun 
+@guruhingiz nomi ga a’zo bo‘lib qo‘ying!
+`, {
                 reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
             });
             userData[chatId] = {};
