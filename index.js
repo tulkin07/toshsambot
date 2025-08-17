@@ -44,17 +44,28 @@ bot.on('message', (msg) => {
 
     // Yo‘lovchi
     if (text === "🧍 Yo‘lovchi") {
-        bot.sendMessage(chatId, "Taksi chaqirish uchun ariza berish.\nIsmingiz va raqamingizni kiriting.\nMasalan: Ali +998xx xxx xx xx");
-        userData[chatId] = { step: "name_phone" };
+        bot.sendMessage(chatId, "Taksi chaqirish uchun ariza berish.\n📞 Telefon raqamingizni yuboring:", {
+            reply_markup: {
+                keyboard: [[{ text: "📱 Telefonni yuborish", request_contact: true }], ["🏠 Bosh sahifa"]],
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
+        });
+        userData[chatId] = { step: "phone" };
         return;
     }
 
-    // Ism va telefon
-    if (userData[chatId]?.step === "name_phone") {
-        userData[chatId].namePhone = text;
+    // Telefon qabul qilish
+    if (userData[chatId]?.step === "phone" && msg.contact) {
+        userData[chatId].phone = msg.contact.phone_number;
+        userData[chatId].name = msg.contact.first_name || msg.from.first_name || "Noma’lum";
         userData[chatId].step = "route";
+
         bot.sendMessage(chatId, "Yo‘nalishingizni tanlang:", {
-            reply_markup: { keyboard: [["Samarqand → Toshkent", "Toshkent → Samarqand"]], resize_keyboard: true }
+            reply_markup: { 
+                keyboard: [["Samarqand → Toshkent", "Toshkent → Samarqand"]], 
+                resize_keyboard: true 
+            }
         });
         return;
     }
@@ -100,11 +111,12 @@ bot.on('message', (msg) => {
         // Tasdiqlash xabari
         bot.sendMessage(chatId,
 `🤵 Yo‘lovchi\n` +
-`1⃣ Ism va telefon: ${userData[chatId].namePhone}\n` +
-`2⃣ Telegram: ${msg.from.username ? `@${msg.from.username}` : " "}\n` +
-`3⃣ Yo‘nalish: ${userData[chatId].route}\n` +
-`4⃣ Yo‘lovchi / Pochta: ${userData[chatId].passengers}\n` +
-`5⃣ Joylashuv: <a href="${userData[chatId].locationLink}">Ko‘rish</a>\n\n` +
+`1⃣ Ism: ${userData[chatId].name}\n` +
+`2⃣ Telefon: ${userData[chatId].phone}\n` +
+`3⃣ Telegram: ${msg.from.username ? `@${msg.from.username}` : " "}\n` +
+`4⃣ Yo‘nalish: ${userData[chatId].route}\n` +
+`5⃣ Yo‘lovchi / Pochta: ${userData[chatId].passengers}\n` +
+`6⃣ Joylashuv: <a href="${userData[chatId].locationLink}">Ko‘rish</a>\n\n` +
 `Barcha ma'lumotlar to‘g‘rimi?`,
 {
     parse_mode: 'HTML',
@@ -119,14 +131,15 @@ bot.on('message', (msg) => {
             const username = msg.from.username ? `@${msg.from.username}` : " ";
             const orderText =
 `<b>🚖 Yangi buyurtma!</b>\n\n` +
-`<b>👤 Ism va telefon:</b> ${userData[chatId].namePhone}\n` +
+`<b>👤 Ism:</b> ${userData[chatId].name}\n` +
+`<b>📞 Telefon:</b> ${userData[chatId].phone}\n` +
 `<b>💬 Telegram:</b> ${username}\n` +
 `<b>📍 Yo‘nalish:</b> ${userData[chatId].route}\n` +
 `<b>🧍 Yo‘lovchi / 📦 Pochta:</b> ${userData[chatId].passengers}\n` +
 `<b>📍 Joylashuv:</b> <a href="${userData[chatId].locationLink}">Ko‘rish</a>`;
 
             bot.sendMessage(GROUP_ID, orderText, { parse_mode: 'HTML', disable_web_page_preview: false });
-            bot.sendMessage(chatId, "So‘rovingiz @toshsamtaxi24 guruhga yuborildi. Haydovchilar sizga tez orada aloqaga chiqadi", {
+            bot.sendMessage(chatId, "So‘rovingiz guruhga yuborildi. Haydovchilar tez orada aloqaga chiqadi ✅", {
                 reply_markup: { keyboard: [["🏠 Bosh sahifa"]], resize_keyboard: true }
             });
             userData[chatId] = {};
