@@ -32,15 +32,39 @@ bot.onText(/\/start/, (msg) => {
     });
 });
 
-bot.on('message', (msg) => {
+bot.on('message',async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
 
-    // Haydovchi
     if (text === "🚖 Haydovchi") {
-        bot.sendMessage(chatId, "Agar siz haydovchi sifatida qo'shilmoqchi bo'lsangiz @frontend_soft ga yoki +998900678097 ga murojaat qiling.");
-        return;
+    const user = {
+      full_name: msg.from.first_name + (msg.from.last_name ? " " + msg.from.last_name : ""),
+      phone: "", // telefonni keyinchalik qo‘shish mumkin
+      username: msg.from.username ? `@${msg.from.username}` : "",
+      chatId: chatId.toString(),
+      status: "pending",
+      createAt: new Date().toISOString(),
+      expireAt: null
+    };
+
+    try {
+      // API ga saqlash
+      const response = await fetch("https://680cdc0b2ea307e081d54192.mockapi.io/users/taxibot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user)
+      });
+
+      if (response.ok) {
+        bot.sendMessage(chatId, "✅ Arizangiz yuborildi. Admin tasdiqlashini kuting.");
+      } else {
+        bot.sendMessage(chatId, "❌ Xatolik! Qaytadan urinib ko‘ring.");
+      }
+    } catch (err) {
+      console.error("API error:", err.message);
+      bot.sendMessage(chatId, "❌ Server bilan ulanishda xatolik yuz berdi.");
     }
+  }
 
     // Yo‘lovchi
     if (text === "🧍 Yo‘lovchi") {
@@ -176,3 +200,54 @@ setInterval(() => {
         .then(res => console.log('Ping status:', res.status))
         .catch(err => console.log('Ping xatolik:', err.message));
 }, 60000);
+
+
+
+
+setInterval(async () => {
+  try {
+    const res = await fetch("https://680cdc0b2ea307e081d54192.mockapi.io/users/taxibot");
+    const users = await res.json();
+
+    for (let user of users) {
+      // ✅ Agar status "tolandi" bo‘lsa va expireAt yo‘q bo‘lsa
+      if (user.status === "tolandi" && !user.expireAt) {
+        const expireAt = new Date();
+        expireAt.setMonth(expireAt.getMonth() + 1); // 1 oy qo‘shamiz
+
+        // API da yangilash
+        await fetch(`https://680cdc0b2ea307e081d54192.mockapi.io/users/taxibot/${user.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ expireAt: expireAt.toISOString() })
+        });
+
+        // Guruhga qo‘shish va yozish huquqi berish
+        await bot.restrictChatMember(GROUP_ID, user.chatId, {
+          can_send_messages: true,
+          can_send_media_messages: true,
+          can_send_polls: true,
+          can_send_other_messages: true
+        });
+
+        bot.sendMessage(user.chatId, "🎉 To‘lovingiz tasdiqlandi! Siz guruhga qo‘shildingiz.");
+      }
+
+      // ❌ Agar expireAt o‘tib ketgan bo‘lsa
+      if (user.expireAt && new Date(user.expireAt) < new Date()) {
+        await bot.restrictChatMember(GROUP_ID, user.chatId, {
+          can_send_messages: false
+        });
+
+        bot.sendMessage(user.chatId, "⏰ Obuna muddati tugadi. Qaytadan to‘lov qilishingiz kerak.");
+      }
+    }
+  } catch (err) {
+    console.error("CRM kuzatuv xatosi:", err.message);
+  }
+}, 60000); // har 1 daqiqada tekshiramiz
+
+// ---------------- SERVER ----------------
+app.listen(PORT, () => {
+  console.log(`Server ${PORT} portda ishga tushdi`);
+});
