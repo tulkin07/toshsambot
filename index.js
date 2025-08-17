@@ -142,9 +142,6 @@ bot.on('message', (msg) => {
             bot.sendMessage(chatId, `🚖 So‘rovingiz @toshsamtaxi24 guruhiga yuborildi. 
 Haydovchilar tez orada siz bilan bog‘lanishadi ✅ 
 
-🙏 Bizni tanlaganingiz uchun katta rahmat! Sizning ishonchingiz biz uchun juda muhim. 
-Biz bilan safaringiz xavfsiz, qulay va tezkor bo‘lishiga ishonch hosil qilamiz.  
-
 👉 Eng so‘nggi yangiliklar va imkoniyatlardan xabardor bo‘lish uchun 
 @toshsamtaxi24 nomi ga a’zo bo‘lib qo‘ying!
 `, {
